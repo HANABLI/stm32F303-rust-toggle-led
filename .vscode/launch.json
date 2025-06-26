@@ -1,0 +1,22 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/target/thumbv7em-none-eabihf/debug/my_first_mcu_project",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "stlink",
+            "svdFile": "C:\\ST\\STM32CubeCLT_1.18.0\\STMicroelectronics_CMSIS_SVD\\STM32F303.svd",
+            "device": "STM32F303",
+            "preLaunchTask": "rust: cargo build[MCU]",
+            "showDevDebugOutput": "raw"
+        }
+    ]
+}
