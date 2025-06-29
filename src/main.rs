@@ -4,27 +4,27 @@
 
 use core::panic::PanicInfo;
 
+use crate::board::*;
+use crate::led::*;
+
+
 mod startup_stm32f303;
-//global array
-static mut SCORES_GLOBAL: [i32; 5] = [1, 2, 3, 4, 5];
+mod mcu;
+mod board;
+mod button;
+mod led;
+mod reg;
+mod gpio;
 
-const _NUMBERS: [i32; 5] = [1, 2, 3, 4, 5]; // Constant array
-
-static mut BUFFER: [u8; 1024] = [0; 1024];
 
 #[unsafe(no_mangle)]
-fn main() {
-
-    let mut _total_score = 0;
-    unsafe {
-        for score in SCORES_GLOBAL {
-            _total_score += score;
-        }
+fn main() { 
+    led_init(BLUE_LED_PORT, BLUE_LED_PIN);
+    
+    led_on(BLUE_LED_PORT, BLUE_LED_PIN);
+    for _i in 0..3 {
     }
-
-    unsafe {
-        BUFFER[0] = 100;
-    }
+    led_off(BLUE_LED_PORT, BLUE_LED_PIN);
 
     loop {
     }
@@ -33,5 +33,11 @@ fn main() {
 #[panic_handler]
 pub fn panic_handler(_info: &PanicInfo) -> ! {
     loop {  }
+}
+
+//button interrupt handler
+#[allow(non_snake_case)]
+pub fn EXTI0_Handler() {
+    led_toggle(board::BLUE_LED_PORT, BLUE_LED_PIN );
 }
 
