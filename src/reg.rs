@@ -1,15 +1,14 @@
 use core::ptr;
 
 pub unsafe fn read_register(addr: *mut u32) -> u32 {
-    unsafe {ptr::read_volatile(addr)}
+    unsafe { ptr::read_volatile(addr) }
 }
 
 unsafe fn write_register(addr: *mut u32, value: u32) {
-    unsafe {ptr::write_volatile(addr, value)};
+    unsafe { ptr::write_volatile(addr, value) };
 }
 
 pub fn reg_set_bit(reg_addr: *mut u32, bit_position: u32, bit_val: bool) {
-
     unsafe {
         // Read the current value of the register.
         let reg_value = read_register(reg_addr);
