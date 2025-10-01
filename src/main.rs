@@ -4,40 +4,48 @@
 
 use core::panic::PanicInfo;
 
-use crate::board::*;
-use crate::led::*;
+use board::*;
+use button::*;
+use led::*;
 
-
-mod startup_stm32f303;
-mod mcu;
 mod board;
 mod button;
-mod led;
-mod reg;
+mod exti;
 mod gpio;
+mod led;
+mod mcu;
+mod proc;
+mod reg;
+mod startup_stm32f303;
 
-
-#[unsafe(no_mangle)]
-fn main() { 
+fn main() {
     led_init(BLUE_LED_PORT, BLUE_LED_PIN);
-    
-    led_on(BLUE_LED_PORT, BLUE_LED_PIN);
-    for _i in 0..3 {
-    }
-    led_off(BLUE_LED_PORT, BLUE_LED_PIN);
 
-    loop {
-    }
+    led_on(BLUE_LED_PORT, BLUE_LED_PIN);
+    // for _i in 0..100 {}
+    // led_off(BLUE_LED_PORT, BLUE_LED_PIN);
+
+    //TODO Add button code
+
+    button::button_init(
+        USER_BTN_PORT,
+        USER_BTN_PIN,
+        Mode::Interrupt(Trigger::RisingEdge),
+    );
+
+    loop {}
 }
 
 #[panic_handler]
 pub fn panic_handler(_info: &PanicInfo) -> ! {
-    loop {  }
+    loop {}
 }
 
 //button interrupt handler
 #[allow(non_snake_case)]
-pub fn EXTI0_Handler() {
-    led_toggle(board::BLUE_LED_PORT, BLUE_LED_PIN );
+#[unsafe(no_mangle)]
+extern "C" fn EXTI15_10_Handler() {
+    led_off(BLUE_LED_PORT, BLUE_LED_PIN);
+    //clear the pending interrupt in the EXTI
+    button_clear_interrupt(USER_BTN_PIN);
 }
-
