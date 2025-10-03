@@ -1,51 +1,38 @@
 #![no_std]
 #![no_main]
 #![allow(clippy::empty_loop)]
+#![allow(dead_code)]
 
-use core::panic::PanicInfo;
+//If you forget to import it, the compiler won't know which
+//entry attribute you are referring to, and you'll get an error
+use cortex_m_rt::{entry, exception};
 
-use board::*;
-use button::*;
-use led::*;
+use cortex_m::peripheral::Peripherals;
+use cortex_m::peripheral::syst;
+use panic_halt as _;
 
 mod board;
-mod button;
-mod exti;
 mod gpio;
 mod led;
 mod mcu;
-mod proc;
 mod reg;
-mod startup_stm32f303;
 
-fn main() {
-    led_init(BLUE_LED_PORT, BLUE_LED_PIN);
+#[entry]
+fn main() -> ! {
+    led::led_init(board::BLUE_LED_PORT, board::BLUE_LED_PIN);
+    led::led_on(board::BLUE_LED_PORT, board::BLUE_LED_PIN);
 
-    led_on(BLUE_LED_PORT, BLUE_LED_PIN);
-    // for _i in 0..100 {}
-    // led_off(BLUE_LED_PORT, BLUE_LED_PIN);
-
-    //TODO Add button code
-
-    button::button_init(
-        USER_BTN_PORT,
-        USER_BTN_PIN,
-        Mode::Interrupt(Trigger::RisingEdge),
-    );
-
-    loop {}
+    let mut peripherals = Peripherals::take().unwrap();
+    let systick = &mut peripherals.SYST;
+    systick.set_clock_source(syst::SystClkSource::Core);
+    systick.set_reload(7_000_000 - 1);
+    systick.clear_current();
+    systick.enable_interrupt();
+    systick.enable_counter();
+    loop { /* .. */ }
 }
 
-#[panic_handler]
-pub fn panic_handler(_info: &PanicInfo) -> ! {
-    loop {}
-}
-
-//button interrupt handler
-#[allow(non_snake_case)]
-#[unsafe(no_mangle)]
-extern "C" fn EXTI15_10_Handler() {
-    led_off(BLUE_LED_PORT, BLUE_LED_PIN);
-    //clear the pending interrupt in the EXTI
-    button_clear_interrupt(USER_BTN_PIN);
+#[exception]
+fn SysTick() {
+    led::led_toggle(board::BLUE_LED_PORT, board::BLUE_LED_PIN);
 }
